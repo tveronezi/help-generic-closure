@@ -29,12 +29,11 @@ impl Display for MyError {
 }
 
 pub fn it_runs_all(something: &str) -> Result<(), MyError> {
-    it_wont_fail().map_err(|e| MyError {
+    let map_err = |e: &dyn Display| MyError {
         message: format!("{} -> {}", e, something),
-    })?;
-    it_fails().map_err(|e| MyError {
-        message: format!("{} -> {}", e, something),
-    })?;
+    };
+    it_wont_fail().map_err(|e| map_err(&e))?;
+    it_fails().map_err(|e| map_err(&e))?;
     Ok(())
 }
 
@@ -45,7 +44,8 @@ mod tests {
     #[test]
     fn it_works() {
         assert_eq!(
-            "something's not right! (No such file or directory (os error 2) -> something)".to_string(),
+            "something's not right! (No such file or directory (os error 2) -> something)"
+                .to_string(),
             format!("{}", it_runs_all("something").err().unwrap())
         )
     }
